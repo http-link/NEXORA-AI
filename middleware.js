@@ -35,7 +35,12 @@ export default async function middleware(request) {
   }
 
   const secret = process.env.NEXORA_SESSION_SECRET || '';
-  const cookie = request.cookies.get(COOKIE)?.value || '';
+  const cookieHeader = request.headers.get('cookie') || '';
+const cookie = cookieHeader
+  .split(';')
+  .map(part => part.trim())
+  .find(part => part.startsWith(`${COOKIE}=`))
+  ?.slice(COOKIE.length + 1) || '';
   if (await validSession(cookie, secret)) return;
 
   if (url.pathname.startsWith('/api/')) {
