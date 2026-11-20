@@ -299,6 +299,12 @@
     }
   });
 
+  /* ---------- private account ---------- */
+  $('logoutBtn')?.addEventListener('click', async () => {
+    try { await fetch('/api/logout', { method: 'POST' }); } catch {}
+    location.replace('/login.html');
+  });
+
   /* ---------- theme ---------- */
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
