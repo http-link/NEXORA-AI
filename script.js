@@ -3,6 +3,10 @@
   const AI_IMG = 'https://res.cloudinary.com/dqqyvozdw/image/upload/v1795167935/ymkqmxn7je9eeyiqtqel.png';
   const STORE_KEY = 'nexora_chats_v1';
   const THEME_KEY = 'nexora_theme';
+  let selectedImage = null;
+  let activeProject = null;
+  let projectsCache = [];
+  let modalMode = ''; 
 
   const $ = (id) => document.getElementById(id);
   const msgsEl = $('messages');
@@ -192,54 +196,159 @@
   function autoGrow() {
     inputEl.style.height = 'auto';
     inputEl.style.height = Math.min(inputEl.scrollHeight, 200) + 'px';
-    sendBtn.disabled = loading || !inputEl.value.trim();
+    sendBtn.disabled = loading || (!inputEl.value.trim() && !selectedImage);
   }
 
   async function send(text) {
     text = (text || '').trim();
-    if (!text || loading) return;
-
+    if ((!text && !selectedImage) || loading) return;
+    if (!text && selectedImage) text = 'Please analyse this image and explain what you see.';
+    const imageForRequest = selectedImage;
+    const displayText = imageForRequest ? `${text}\n[Image attached: ${imageForRequest.name}]` : text;
     let chat = current();
     if (!chat) {
       chat = { id: uid(), title: text.length > 40 ? text.slice(0, 40) + '…' : text, messages: [], updated: Date.now() };
-      chats.push(chat);
-      currentId = chat.id;
+      chats.push(chat); currentId = chat.id;
     }
-    chat.messages.push({ role: 'user', content: text, time: timeNow() });
-    chat.updated = Date.now();
-    save();
-
-    inputEl.value = ''; autoGrow();
-    errorMsg = null; loading = true;
-    sendBtn.disabled = true;
+    chat.messages.push({ role: 'user', content: displayText, time: timeNow() });
+    chat.updated = Date.now(); save();
+    selectedImage = null; renderAttachment();
+    inputEl.value = ''; autoGrow(); errorMsg = null; loading = true; sendBtn.disabled = true;
     renderList(); renderMessages();
-
     const activeId = chat.id;
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: chat.messages.slice(-20).map((m) => ({ role: m.role, content: m.content })) })
+      const history = chat.messages.slice(-20).map((m, index, arr) => {
+        if (imageForRequest && index === arr.length - 1) return { role: m.role, content: [
+          { type: 'text', text: text },
+          { type: 'image_url', image_url: { url: imageForRequest.data } }
+        ] };
+        return { role: m.role, content: m.content };
       });
-      let data = {};
-      try { data = await res.json(); } catch {}
+      const res = await fetch('/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history, mode: $('modelSelect')?.value || 'auto', long_mode: !!$('longMode')?.checked, project_context: activeProject ? `${activeProject.name}\n${activeProject.description || ''}\n${activeProject.context || ''}` : '' })
+      });
+      let data = {}; try { data = await res.json(); } catch {}
       if (!res.ok || !data.reply) throw new Error(data.error || `Request failed (${res.status})`);
-
-      const target = chats.find((c) => c.id === activeId);
+      const target = chats.find(c => c.id === activeId);
       if (target) {
-        target.messages.push({ role: 'assistant', content: data.reply, time: timeNow(), feedback: null });
-        target.updated = Date.now();
-        save();
+        target.messages.push({ role: 'assistant', content: data.reply, time: timeNow(), feedback: null, model: data.model });
+        target.updated = Date.now(); save();
       }
+      if (activeProject) await appendProjectMemory(activeProject, text, data.reply);
+      const status = document.querySelector('.status');
+      if (status) status.innerHTML = `<i></i> ${escapeHtml(data.provider || 'AI')} · ${escapeHtml(data.model || 'Ready')}`;
     } catch (err) {
-      errorMsg = 'Sorry, I could not get a reply right now. ' + (err.message ? `(${err.message}) ` : '') + 'Please check your connection and try again.';
+      errorMsg = 'NEXORA could not complete the request. ' + (err.message ? `(${err.message}) ` : '') + 'Please check your provider setup and try again.';
     } finally {
-      loading = false;
-      autoGrow();
-      renderList();
-      if (currentId === activeId) renderMessages();
+      loading = false; autoGrow(); renderList(); if (currentId === activeId) renderMessages();
     }
   }
+
+
+  /* ---------- PRO workspace: images, projects, usage, export ---------- */
+  function showModal(title, html) {
+    $('modalTitle').textContent = title; $('modalContent').innerHTML = html;
+    $('modalBackdrop').hidden = false; modalMode = title;
+  }
+  function closeModal() { $('modalBackdrop').hidden = true; modalMode = ''; }
+  async function apiJson(url, options = {}) {
+    const r = await fetch(url, { ...options, headers: { 'Content-Type':'application/json', ...(options.headers || {}) } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || `Request failed (${r.status})`);
+    return d;
+  }
+  async function loadProjects() {
+    const d = await apiJson('/api/projects'); projectsCache = d.projects || []; return projectsCache;
+  }
+  function extractProjectFiles(reply) {
+    const files = [];
+    const pattern = /(?:^|\n)\s*(?:#{1,4}\s*)?(?:\*\*)?([\w./-]+\.(?:html|css|js|jsx|ts|tsx|json|md|py|php|sql|vue|svelte|java|c|cpp|txt))(?:\*\*)?\s*\n```[\w+#.-]*\n([\s\S]*?)```/g;
+    let match; while ((match = pattern.exec(reply)) && files.length < 40) { const path = match[1].replace(/^\/+|\.\./g,''); if (path) files.push({ path, content:match[2].trimEnd() }); }
+    return files;
+  }
+  async function appendProjectMemory(project, prompt, reply) {
+    try {
+      const extracted = extractProjectFiles(reply);
+      project.files = [...(project.files || []), ...extracted].reduce((acc, file) => { const i = acc.findIndex(x => x.path === file.path); if (i >= 0) acc[i] = file; else acc.push(file); return acc; }, []).slice(0,100);
+      project.context = `${project.context || ''}\n\nUSER: ${prompt}\nNEXORA: ${reply}`.slice(-11000);
+      await apiJson(`/api/project?id=${encodeURIComponent(project.id)}`, { method:'PUT', body:JSON.stringify({ name:project.name, description:project.description || '', context:project.context, files:project.files || [] }) });
+    } catch (e) { console.warn('Project memory could not be saved:', e.message); }
+  }
+  async function openProjects() {
+    showModal('Projects', '<div class="modal-row"><div><strong>Project Memory</strong><small>Save project context, decisions and generated files in Cloudflare D1.</small></div><div style="display:flex;gap:7px"><button class="modal-secondary" id="exportProject">Export ZIP</button><button class="modal-primary" id="createProject">+ New project</button></div></div><div id="projectRows" class="modal-empty">Loading projects…</div>');
+    try {
+      const projects = await loadProjects();
+      $('projectRows').innerHTML = projects.length ? projects.map(p => `<div class="modal-row"><div><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.description || 'No description')}${activeProject?.id === p.id ? ' · Active' : ''}</small></div><button class="modal-secondary" data-project="${escapeHtml(p.id)}">${activeProject?.id === p.id ? 'Selected' : 'Open'}</button></div>`).join('') : '<div class="modal-empty">No projects saved yet. Create your first project.</div>';
+    } catch (e) { $('projectRows').innerHTML = `<div class="modal-empty">${escapeHtml(e.message)}<br><br>Cloudflare storage needs to be configured first.</div>`; }
+  }
+  async function createProject() {
+    const name = prompt('Project name?'); if (!name?.trim()) return;
+    const description = prompt('Short project description (optional):') || '';
+    try {
+      const d = await apiJson('/api/projects', { method:'POST', body:JSON.stringify({ name:name.trim(), description, context:'', files:[] }) });
+      activeProject = d.project; closeModal(); renderProjectStatus();
+    } catch (e) { alert(e.message); }
+  }
+  function renderProjectStatus() {
+    const status = document.querySelector('.status');
+    if (status && activeProject) status.innerHTML = `<i></i> Project: ${escapeHtml(activeProject.name)}`;
+  }
+  async function showUsage() {
+    showModal('Usage Dashboard', '<div class="modal-empty">Loading usage…</div>');
+    try {
+      const d = await apiJson('/api/usage');
+      $('modalContent').innerHTML = `<div class="modal-row"><div><strong>Requests · last 24 hours</strong><small>Requests recorded by NEXORA</small></div><strong>${Number(d.requests || 0).toLocaleString()}</strong></div><div class="modal-row"><div><strong>Recorded tokens</strong><small>${escapeHtml(d.token_note || 'Provider-reported tokens')}</small></div><strong>${Number(d.recorded_tokens || 0).toLocaleString()}</strong></div><h3 style="font-size:13px;margin:20px 0 8px">Provider breakdown</h3>${(d.breakdown || []).map(x => `<div class="modal-row"><div><strong>${escapeHtml(x.provider)} · ${escapeHtml(x.model)}</strong><small>${escapeHtml(x.request_type)}</small></div><strong>${x.requests}</strong></div>`).join('') || '<div class="modal-empty">No usage records yet.</div>'}`;
+    } catch (e) { $('modalContent').innerHTML = `<div class="modal-empty">${escapeHtml(e.message)}<br><br>Connect Cloudflare D1 to activate global usage tracking.</div>`; }
+  }
+  async function exportActiveProject() {
+    if (!activeProject) { alert('Open a project first.'); return; }
+    if (!(activeProject.files || []).length) { alert('No project files have been captured yet. Ask NEXORA to provide files with clear filenames such as index.html, style.css and script.js while this project is active.'); return; }
+    try {
+      const r = await fetch('/api/export', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ files:activeProject.files }) });
+      if (!r.ok) { const d=await r.json().catch(()=>({})); throw new Error(d.error || 'Export failed.'); }
+      const blob = await r.blob(), url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href=url; a.download=(activeProject.name || 'nexora-project').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.zip'; a.click(); URL.revokeObjectURL(url);
+    } catch(e) { alert(e.message); }
+  }
+  function openImageStudio() {
+    showModal('Image Studio', `<p style="color:#95A2B8;font-size:12px;line-height:1.7">Create an image from a prompt using your configured image-generation provider. Upload and analyse images directly from the chat composer.</p><label class="modal-label">Image prompt</label><textarea class="modal-textarea" id="imagePrompt" placeholder="A premium futuristic dashboard illustration…"></textarea><button class="modal-primary" id="generateImage">Generate image</button><div id="imageResult"></div>`);
+  }
+  async function generateImage() {
+    const promptText = $('imagePrompt')?.value.trim(); if (!promptText) return;
+    $('generateImage').disabled = true; $('generateImage').textContent = 'Generating…';
+    try {
+      const d = await apiJson('/api/generate-image', { method:'POST', body:JSON.stringify({ prompt:promptText }) });
+      $('imageResult').innerHTML = d.image ? `<img class="modal-image" src="${d.image}" alt="Generated image">` : '<div class="modal-empty">Provider returned no image.</div>';
+    } catch (e) { $('imageResult').innerHTML = `<div class="modal-empty">${escapeHtml(e.message)}</div>`; }
+    finally { if ($('generateImage')) { $('generateImage').disabled = false; $('generateImage').textContent = 'Generate image'; } }
+  }
+  function renderAttachment() {
+    const box = $('attachmentPreview'); if (!box) return;
+    if (!selectedImage) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false; box.innerHTML = `<img src="${selectedImage.data}" alt="Selected image">${escapeHtml(selectedImage.name)} <button id="removeAttachment" type="button" title="Remove image"><i class="fa-solid fa-xmark"></i></button>`;
+  }
+  $('attachBtn')?.addEventListener('click', () => $('imageInput').click());
+  $('imageInput')?.addEventListener('change', async e => {
+    const file = e.target.files?.[0]; if (!file) return;
+    if (!['image/png','image/jpeg','image/webp'].includes(file.type)) { alert('Please choose PNG, JPG or WebP.'); e.target.value=''; return; }
+    if (file.size > 6 * 1024 * 1024) { alert('Image must be smaller than 6 MB.'); e.target.value=''; return; }
+    const reader = new FileReader(); reader.onload = () => { selectedImage = { name:file.name, data:String(reader.result) }; renderAttachment(); autoGrow(); }; reader.readAsDataURL(file);
+  });
+  $('attachmentPreview')?.addEventListener('click', e => { if (e.target.closest('#removeAttachment')) { selectedImage = null; $('imageInput').value=''; renderAttachment(); } });
+  $('projectsBtn')?.addEventListener('click', openProjects);
+  $('imageStudioBtn')?.addEventListener('click', openImageStudio);
+  $('usageBtn')?.addEventListener('click', showUsage);
+  $('modalContent')?.addEventListener('click', e => {
+    if (e.target.closest('#createProject')) { createProject(); return; }
+    if (e.target.closest('#exportProject')) { exportActiveProject(); return; }
+    if (e.target.closest('#generateImage')) { generateImage(); return; }
+    const p = e.target.closest('[data-project]');
+    if (p) { activeProject = projectsCache.find(x => x.id === p.dataset.project) || null; closeModal(); renderProjectStatus(); }
+  });
+  $('closeModal')?.addEventListener('click', closeModal);
+  $('modalBackdrop')?.addEventListener('click', e => { if (e.target.id === 'modalBackdrop') closeModal(); });
+  $('input')?.addEventListener('paste', e => { const item = [...(e.clipboardData?.items || [])].find(x => x.type.startsWith('image/')); if (!item) return; const file = item.getAsFile(); if (file && file.size <= 6*1024*1024) { const reader = new FileReader(); reader.onload = () => { selectedImage={name:'pasted-image',data:String(reader.result)}; renderAttachment(); }; reader.readAsDataURL(file); } });
 
   /* ---------- events ---------- */
   inputEl.addEventListener('input', autoGrow);
@@ -319,8 +428,8 @@
   /* ---------- init ---------- */
   $('topAvatar').innerHTML = avatarHTML('md');
   $('brandBox').insertAdjacentHTML('afterbegin', avatarHTML('sm'));
-  let savedTheme = 'light';
-  try { savedTheme = localStorage.getItem(THEME_KEY) || 'light'; } catch {}
+  let savedTheme = 'dark';
+  try { savedTheme = localStorage.getItem(THEME_KEY) || 'dark'; } catch {}
   applyTheme(savedTheme);
   load();
   renderList();

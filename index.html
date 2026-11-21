@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -30,16 +30,16 @@
     --radius: 18px;
   }
   [data-theme="dark"] {
-    --bg: #0B1020;
-    --surface: #171B2B;
-    --sidebar: #0E1428;
-    --glass: rgba(11, 16, 32, .72);
-    --border: rgba(255, 255, 255, .08);
-    --text: #F8FAFC;
-    --muted: #98A2B8;
-    --user-bubble: rgba(139, 92, 246, .24);
-    --code-bg: #070B16;
-    --shadow: 0 8px 30px rgba(0, 0, 0, .35);
+    --bg: #080B13;
+    --surface: #111725;
+    --sidebar: #0B101B;
+    --glass: rgba(8, 11, 19, .86);
+    --border: rgba(160, 174, 205, .12);
+    --text: #F3F5FB;
+    --muted: #8994AA;
+    --user-bubble: rgba(124, 92, 255, .20);
+    --code-bg: #070A11;
+    --shadow: 0 14px 44px rgba(0, 0, 0, .28);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -230,6 +230,106 @@
     .bubble { max-width: 88%; }
     .msg { gap: 10px; }
   }
+
+  /* NEXORA PRO visual refresh */
+  :root { --accent:#9B7BFF; --accent-2:#55D6E8; --accent-soft:rgba(155,123,255,.13); --radius:20px; }
+  [data-theme="dark"] body { background:#080B13; }
+  body::before { background:radial-gradient(720px 420px at 80% -12%,rgba(117,82,255,.16),transparent 68%),radial-gradient(560px 360px at 4% 100%,rgba(48,191,211,.09),transparent 70%); }
+  .sidebar { width:272px; padding:22px 16px 16px; gap:15px; background:linear-gradient(180deg,rgba(14,19,31,.98),rgba(9,13,22,.98)); border-right:1px solid rgba(166,179,210,.10); }
+  .brand { padding:5px 7px 17px; gap:12px; }
+  .brand b { font-size:16px; letter-spacing:.8px; }
+  .brand small { margin-top:4px; font-size:10px; letter-spacing:.25px; }
+  .brand .avatar { width:39px;height:39px;box-shadow:0 0 24px rgba(155,123,255,.22); }
+  .new-chat { border:1px solid rgba(193,177,255,.24); border-radius:13px; padding:13px 15px; background:linear-gradient(120deg,#7958E8,#5840B9); box-shadow:0 8px 24px rgba(93,66,190,.24); }
+  .new-chat:hover { box-shadow:0 12px 30px rgba(93,66,190,.34); }
+  .side-title { padding:8px 9px 0; color:#727F98; font-size:9px; letter-spacing:1.55px; }
+  .recent-title { padding-top:3px; }
+  .chat-list { gap:5px; padding:2px 0; }
+  .chat-item { padding:11px 12px; border:1px solid transparent; border-radius:11px; color:#AEB8CC; font-size:12.5px; }
+  .chat-item:hover { background:rgba(148,126,255,.08); border-color:rgba(148,126,255,.10); }
+  .chat-item.active { background:rgba(148,126,255,.12); border-color:rgba(148,126,255,.16); box-shadow:inset 2px 0 0 #A78BFA; color:#F1EEFF; }
+  .side-foot { border-color:rgba(166,179,210,.10); padding:14px 8px 3px; font-size:10px; color:#77839A; }
+  .side-foot b { color:#B7A5FF; }
+  .main { background:rgba(8,11,19,.18); }
+  .topbar { min-height:72px; padding:12px 26px; background:rgba(8,11,19,.76); border-bottom-color:rgba(166,179,210,.10); }
+  .ai-title strong { font-size:17px; letter-spacing:.55px; }
+  .title-ai { color:#B49BFF; }
+  .status { font-size:10px; letter-spacing:.15px; color:#8995AA; }
+  .status i { width:6px;height:6px; box-shadow:0 0 9px #22c55e; }
+  .icon-btn { width:38px;height:38px;border:1px solid transparent;border-radius:11px; }
+  .icon-btn:hover { background:rgba(155,123,255,.10); border-color:rgba(155,123,255,.12); }
+  .messages { padding:34px 24px 18px; }
+  .thread { max-width:900px; gap:26px; }
+  .welcome { max-width:900px; padding:48px 0 24px; }
+  .welcome .avatar.xl { width:76px;height:76px; margin-bottom:22px; box-shadow:0 0 0 1px rgba(181,159,255,.25),0 0 48px rgba(125,91,255,.24); }
+  .welcome h1 { font-size:clamp(30px,4.4vw,46px); letter-spacing:-1.5px; background:linear-gradient(100deg,#F5F2FF 8%,#B6A1FF 54%,#69DCEB 100%); -webkit-background-clip:text;background-clip:text; }
+  .welcome p { max-width:600px; margin-top:14px; color:#929DB2; font-size:14px; line-height:1.8; }
+  .tagline { margin-top:17px; font-size:9px; letter-spacing:2.3px; color:#A994FF; }
+  .cards { max-width:760px; margin:34px auto 0; gap:13px; }
+  .card { min-height:118px; padding:19px; gap:10px; background:linear-gradient(145deg,rgba(21,28,44,.92),rgba(14,19,31,.94)); border:1px solid rgba(166,179,210,.12); border-radius:16px; box-shadow:0 12px 32px rgba(0,0,0,.13); }
+  .card:hover { transform:translateY(-3px); border-color:rgba(167,139,250,.48); box-shadow:0 16px 38px rgba(0,0,0,.24),0 0 24px rgba(139,92,246,.08); }
+  .card i { color:#B19AFF; font-size:17px; }
+  .card b { color:#E8EAF3; font-size:13px; }
+  .card span { color:#8D99AE; font-size:11.5px; line-height:1.65; }
+  .msg { gap:13px; }
+  .avatar.sm { width:31px;height:31px; box-shadow:0 0 0 1px rgba(155,123,255,.25); }
+  .bubble { background:linear-gradient(135deg,rgba(117,91,216,.24),rgba(72,111,160,.16)); border:1px solid rgba(163,143,255,.16); border-radius:17px 17px 5px 17px; color:#F1F0FA; font-size:14px; }
+  .ai-content { color:#D9DEEA; font-size:14px; line-height:1.8; }
+  .ai-content h1,.ai-content h2,.ai-content h3 { color:#F2EEFF; }
+  .ai-content code { background:rgba(155,123,255,.13); color:#C4B4FF; }
+  .code-block { border-radius:13px; border-color:rgba(166,179,210,.13); box-shadow:0 12px 30px rgba(0,0,0,.16); }
+  .code-head { background:#111827; }
+  .actions { margin-top:10px; }
+  .act { border:1px solid transparent; }
+  .act:hover { background:rgba(155,123,255,.10); }
+  .composer-wrap { padding:12px 24px calc(17px + env(safe-area-inset-bottom)); background:linear-gradient(180deg,transparent,rgba(8,11,19,.78) 30%); }
+  .composer { max-width:900px; min-height:62px; padding:9px 10px 9px 19px; background:rgba(18,24,38,.96); border:1px solid rgba(166,179,210,.17); border-radius:18px; box-shadow:0 16px 44px rgba(0,0,0,.24); }
+  .composer:focus-within { border-color:rgba(167,139,250,.68); box-shadow:0 0 0 3px rgba(155,123,255,.10),0 16px 44px rgba(0,0,0,.24); }
+  .composer textarea { color:#F0F2F8; font-size:14px; }
+  .composer textarea::placeholder { color:#77839A; }
+  .send { width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#A18AFF,#6F56D9); box-shadow:0 7px 20px rgba(117,88,218,.28); }
+  .note { font-size:10px; color:#66738A; margin-top:10px; }
+  [data-theme="light"] body::before { background:radial-gradient(600px 300px at 85% -5%,rgba(139,92,246,.10),transparent 70%),radial-gradient(500px 280px at 10% 105%,rgba(34,211,238,.08),transparent 70%); }
+  [data-theme="light"] .sidebar { background:#F6F7FB; }
+  [data-theme="light"] .card { background:#fff; }
+  [data-theme="light"] .composer { background:#fff; }
+  @media (max-width:820px) {
+    .sidebar { width:min(290px,86vw); padding:18px 14px; }
+    .topbar { min-height:64px; padding:8px 13px; }
+    .messages { padding:22px 15px 12px; }
+    .welcome { padding:36px 0 18px; }
+    .welcome .avatar.xl { width:66px;height:66px; }
+    .cards { margin-top:25px; gap:10px; }
+    .card { min-height:100px; padding:15px; }
+    .composer-wrap { padding:9px 12px calc(12px + env(safe-area-inset-bottom)); }
+    .composer { min-height:56px; border-radius:16px; padding-left:14px; }
+    .bubble { max-width:90%; }
+  }
+  @media (max-width:420px) {
+    .ai-title strong { font-size:15px; }
+    .status { font-size:9px; }
+    .icon-btn { width:35px;height:35px; }
+    .welcome h1 { font-size:29px; }
+    .welcome p { font-size:12.5px; padding:0 8px; }
+  }
+
+
+  .workspace-actions{display:grid;gap:5px;margin-top:-5px}
+  .workspace-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;text-align:left;color:#AEB8CC;font-size:12.5px;border:1px solid transparent;transition:.18s}
+  .workspace-link i{width:17px;color:#A994FF;text-align:center}.workspace-link:hover{background:rgba(148,126,255,.09);border-color:rgba(148,126,255,.12);color:#fff}
+  .model-select{max-width:145px;padding:9px 11px;border-radius:10px;border:1px solid rgba(166,179,210,.16);background:#121827;color:#DDE3F1;font:inherit;font-size:11px;outline:none}
+  .composer-tools{max-width:900px;margin:0 auto 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 4px}
+  .tool-btn,.long-toggle{font:inherit;font-size:11px;color:#9BA7BD;display:inline-flex;align-items:center;gap:7px;cursor:pointer}.tool-btn{padding:7px 10px;border:1px solid rgba(166,179,210,.13);border-radius:9px}.tool-btn:hover{color:#C5B5FF;border-color:rgba(167,139,250,.35)}
+  .long-toggle input{accent-color:#9B7BFF}.tool-hint{margin-left:auto;color:#64728A;font-size:10px}
+  .attachment-preview{max-width:900px;margin:0 auto 8px;padding:8px 11px;border:1px solid rgba(166,179,210,.15);border-radius:12px;background:rgba(18,24,38,.8);color:#C7D0E0;font-size:11px}
+  .attachment-preview img{width:42px;height:42px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:9px}.attachment-preview button{float:right;color:#9BA7BD;padding:6px}
+  .modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(3,6,14,.72);backdrop-filter:blur(9px);display:grid;place-items:center;padding:18px}.modal-backdrop[hidden]{display:none}
+  .workspace-modal{width:min(680px,100%);max-height:min(760px,90dvh);overflow:auto;border:1px solid rgba(166,179,210,.16);border-radius:20px;background:#101725;color:#E8EDF7;box-shadow:0 28px 90px rgba(0,0,0,.5)}
+  .workspace-modal>header{display:flex;align-items:center;justify-content:space-between;padding:21px 23px;border-bottom:1px solid rgba(166,179,210,.12)}.workspace-modal h2{font-size:21px;margin-top:4px}.modal-eyebrow{font-size:9px;letter-spacing:1.7px;color:#A994FF;font-weight:800}.modal-content{padding:20px 23px 24px}
+  .modal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid rgba(166,179,210,.1)}.modal-row:last-child{border:0}
+  .modal-row strong{display:block;font-size:13px}.modal-row small{display:block;color:#8190A8;font-size:11px;margin-top:4px}.modal-primary,.modal-secondary{border-radius:10px;padding:10px 13px;font:inherit;font-size:11px;font-weight:700}.modal-primary{background:linear-gradient(120deg,#8B6AF0,#5D49C2);color:white}.modal-secondary{border:1px solid rgba(166,179,210,.2);color:#C6D0E1}
+  .modal-input,.modal-textarea{width:100%;margin:8px 0;padding:12px 13px;border:1px solid rgba(166,179,210,.17);border-radius:10px;background:#0B111D;color:#EDF2FA;font:inherit;font-size:12px;outline:none}.modal-textarea{min-height:92px;resize:vertical}.modal-label{display:block;margin-top:13px;color:#A6B2C8;font-size:11px}.modal-image{max-width:100%;max-height:380px;border-radius:12px;margin-top:14px;display:block}.modal-empty{padding:24px;text-align:center;color:#8996AB;font-size:12px}
+  @media(max-width:820px){.model-select{max-width:105px;font-size:10px;padding:8px 6px}.workspace-modal>header{padding:17px}.modal-content{padding:16px}.tool-hint{display:none}}
 </style>
 </head>
 <body>
@@ -242,7 +342,13 @@
       </div>
     </div>
     <button class="new-chat" id="newChat"><i class="fa-solid fa-plus"></i> New chat</button>
-    <div class="side-title">Recent chats</div>
+    <div class="side-title">WORKSPACE</div>
+    <div class="workspace-actions">
+      <button class="workspace-link" id="projectsBtn"><i class="fa-solid fa-folder-open"></i><span>Projects</span></button>
+      <button class="workspace-link" id="imageStudioBtn"><i class="fa-regular fa-image"></i><span>Image Studio</span></button>
+      <button class="workspace-link" id="usageBtn"><i class="fa-solid fa-chart-simple"></i><span>Usage dashboard</span></button>
+    </div>
+    <div class="side-title recent-title">RECENT CONVERSATIONS</div>
     <div class="chat-list" id="chatList"></div>
     <div class="side-foot"><b>Your Ideas. Your Code. Your Future.</b><br />© VEX Creative Designs</div>
   </aside>
@@ -253,10 +359,11 @@
       <button class="icon-btn" id="menuBtn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
       <span id="topAvatar"></span>
       <div class="ai-title">
-        <strong>NEXORA AI</strong>
-        <span class="status"><i></i> Online</span>
+        <strong>NEXORA <span class="title-ai">AI</span></strong>
+        <span class="status"><i></i> Workspace ready</span>
       </div>
       <div class="spacer"></div>
+      <select id="modelSelect" class="model-select" aria-label="AI model"><option value="auto">Auto model</option><option value="coding">Coding AI</option><option value="vision">Vision AI</option></select>
       <button class="icon-btn" id="logoutBtn" aria-label="Sign out" title="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
     </header>
@@ -264,13 +371,26 @@
     <section class="messages" id="messages"></section>
 
     <div class="composer-wrap">
+      <div id="attachmentPreview" class="attachment-preview" hidden></div>
+      <div class="composer-tools">
+        <button class="tool-btn" id="attachBtn" title="Upload image"><i class="fa-solid fa-paperclip"></i> Attach image</button>
+        <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+        <label class="long-toggle"><input id="longMode" type="checkbox" /> <span>Long Coding Mode</span></label>
+        <span class="tool-hint">Images up to 6 MB</span>
+      </div>
       <div class="composer">
-        <textarea id="input" rows="1" placeholder="Ask NEXORA AI to build, debug or teach code..."></textarea>
+        <textarea id="input" rows="1" placeholder="Describe what you want to build..."></textarea>
         <button class="send" id="sendBtn" disabled aria-label="Send"><i class="fa-solid fa-arrow-up"></i></button>
       </div>
-      <div class="note">NEXORA AI can make mistakes.</div>
+      <div class="note">NEXORA AI can make mistakes. Review generated code before deployment.</div>
     </div>
   </main>
+</div>
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <section class="workspace-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header><div><span class="modal-eyebrow">NEXORA WORKSPACE</span><h2 id="modalTitle">Projects</h2></div><button class="icon-btn" id="closeModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></header>
+    <div id="modalContent" class="modal-content"></div>
+  </section>
 </div>
 <script src="script.js"></script>
 </body>

@@ -1,0 +1,8 @@
+name = "nexora-data"
+main = "worker.js"
+compatibility_date = "2026-11-20"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nexora-data"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
